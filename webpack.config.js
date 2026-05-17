@@ -94,6 +94,7 @@ module.exports = (env, options) => {
             chunkFilename: '[name].[contenthash].js',
             clean: true,
             assetModuleFilename: `[name][contenthash][ext][query]`,
+            publicPath: devMode ? '/' : './',
         },
         devtool: devMode ? 'source-map' : false,
         resolve: {

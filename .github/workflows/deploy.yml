@@ -1,0 +1,46 @@
+name: Build and Deploy Sentinel-2 Explorer
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create .env file from secrets
+        run: |
+          cat <<EOF > .env
+          SENTINEL2_EXPLORER_APP_ID = ${{ secrets.SENTINEL2_EXPLORER_APP_ID }}
+          SENTINEL2_PROXY_SERVICE_URL = ${{ secrets.SENTINEL2_PROXY_SERVICE_URL }}
+          SENTINEL2_ORIGINAL_SERVICE_URL = https://sentinel.imagery1.arcgis.com/arcgis/rest/services/Sentinel2L2A/ImageServer
+          ARCGIS_PORTAL_ROOT_URL = https://www.arcgis.com
+          RASTER_ANALYSIS_SERVICE_ROOT_URL = https://rasteranalysis.arcgis.com/arcgis/rest/services/RasterAnalysisTools/GPServer
+          EOF
+
+      - name: Build Sentinel-2 Explorer
+        run: npm run build:sentinel2
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist/sentinel2explorer
+          force_orphan: true

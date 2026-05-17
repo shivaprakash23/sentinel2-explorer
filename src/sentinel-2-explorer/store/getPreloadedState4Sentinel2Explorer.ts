@@ -28,7 +28,6 @@ import {
 } from '@shared/services/sentinel-2/config';
 import { getPreloadedState4PublishAndDownloadJobs } from '@shared/store/PublishAndDownloadJobs/getPreloadedState';
 import { getMapCenterFromHashParams } from '@shared/utils/url-hash-params';
-import { getRandomElement } from '@shared/utils/snippets/getRandomElement';
 import { sentinel2InterestingPlaces } from '@sentinel2-explorer/components/Sentinel2InterestingPlaces';
 import { getTimeExtentOfSentinel2Service } from '@shared/services/sentinel-2/getTimeExtent';
 import { getTranslatedSentinel2RasterFunctionInfo } from '@sentinel2-explorer/utils/getTranslatedSentinel2RasterFunctionInfo';
@@ -45,12 +44,21 @@ export const getPreloadedState = async (): Promise<PartialRootState> => {
     const mapLocationFromHashParams = getMapCenterFromHashParams(hashParams);
 
     /**
-     * Use the location of a randomly selected interesting place if there is no map location info
-     * found in the URL hash params.
+     * Default to Maharashtra, India when no map location is found in URL hash params.
      */
-    const randomInterestingPlace = !mapLocationFromHashParams
-        ? getRandomElement(sentinel2InterestingPlaces)
-        : null;
+    const randomInterestingPlace: InterestingPlaceData =
+        !mapLocationFromHashParams
+            ? {
+                  key: 'maharashtra',
+                  name: 'Maharashtra, India',
+                  location: {
+                      center: [75.7139, 19.7515],
+                      zoom: 7,
+                  },
+                  renderer: 'Natural Color for Visualization',
+                  thumbnail: '',
+              }
+            : null;
 
     const defaultRasterFunction: Sentinel2FunctionName =
         'Natural Color for Visualization';
